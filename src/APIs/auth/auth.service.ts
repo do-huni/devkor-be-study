@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { JwtDto } from './dtos/jwt.dto';
+import { MailsService } from '../mails/mails.service';
 
 @Injectable()
 export class AuthService {
@@ -11,6 +12,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly mailsService: MailsService,
   ) {}
   async getJWT(jwtDto: JwtDto) {
     const user = await this.validateUser(jwtDto);
@@ -18,6 +20,20 @@ export class AuthService {
     console.log(accessToken);
     const refreshToken = await this.generateRefreshToken(user); // refreshToken 생성
     return { accessToken, refreshToken };
+  }
+
+  async validateEmail({ email }) {
+    const code = await this.mailsService.saveCode({ email });
+    await this.mailsService.sendEmail({
+      email,
+      code,
+      filename: 'email',
+    });
+  }
+
+  async checkEmail({ email, code }) {
+    await this.mailsService.checkCode({ email, code });
+    await this.usersService.toggleVerfied({ email });
   }
 
   async validateUser(jwtDto: JwtDto) {
@@ -31,7 +47,9 @@ export class AuthService {
     return user;
   }
 
-  generateAccessToken(jwtDto: JwtDto) {
+  async generateAccessToken(jwtDto: JwtDto) {
+    await this.usersService.checkVerified({ email: jwtDto.email });
+
     const payload = { email: jwtDto.email };
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
@@ -40,6 +58,8 @@ export class AuthService {
   }
 
   async generateRefreshToken(jwtDto: JwtDto) {
+    await this.usersService.checkVerified({ email: jwtDto.email });
+
     const payload = { email: jwtDto.email };
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),

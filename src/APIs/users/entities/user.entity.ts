@@ -14,6 +14,9 @@ export class User {
   @Column()
   password: string;
 
+  @Column()
+  isVerified: boolean;
+
   @Column({ default: null })
   current_refresh_token: string;
 }

@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   Post,
+  Render,
   Req,
   Res,
   UnauthorizedException,
@@ -11,6 +12,8 @@ import {
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
 import { JwtDto } from './dtos/jwt.dto';
+import { CheckEmailDto } from './dtos/checkemail.dto';
+import { CheckCodeDto } from './dtos/checkCodeDto';
 
 @Controller('auth')
 export class AuthController {
@@ -18,6 +21,18 @@ export class AuthController {
 
   @Post('signup')
   @HttpCode(301)
+  async signup(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: CheckEmailDto,
+  ) {
+    await this.authService.validateEmail({
+      email: body.email,
+    });
+    return res.redirect('signup/email');
+  }
+
+  @Post('signin')
   async getJWT(
     @Req() req: Request,
     @Res() res: Response,
@@ -27,7 +42,16 @@ export class AuthController {
     res.cookie('accessToken', accessToken, { httpOnly: true });
     res.cookie('refreshToken', refreshToken, { httpOnly: true });
     res.cookie('isLoggedIn', true, { httpOnly: false });
-    return res.redirect(process.env.CLIENT_URL);
+  }
+
+  @Get('signup/email')
+  @Render('emailCodeVerify')
+  async checkSignupEmail() {}
+
+  @Post('signup/email')
+  async verifyEmail(@Body() body: CheckCodeDto) {
+    console.log(body);
+    await this.authService.checkEmail(body);
   }
 
   @Get('refresh')
