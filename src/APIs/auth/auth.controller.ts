@@ -12,8 +12,8 @@ import {
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
 import { JwtDto } from './dtos/jwt.dto';
-import { CheckEmailDto } from './dtos/checkemail.dto';
 import { CheckCodeDto } from './dtos/checkCodeDto';
+import { CheckEmailDto } from './dtos/checkEmail.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -24,12 +24,25 @@ export class AuthController {
   async signup(
     @Req() req: Request,
     @Res() res: Response,
-    @Body() body: CheckEmailDto,
+    @Body() body: JwtDto,
   ) {
+    await this.authService.validateUser(body);
     await this.authService.validateEmail({
       email: body.email,
     });
     return res.redirect('signup/email');
+  }
+
+  @Post('clearpw')
+  async clearpw(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: CheckEmailDto,
+  ) {
+    await this.authService.clearpw(body);
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+    res.clearCookie('isLoggedIn');
   }
 
   @Post('signin')

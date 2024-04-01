@@ -1,10 +1,16 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { JwtDto } from './dtos/jwt.dto';
 import { MailsService } from '../mails/mails.service';
+import { v4 as uuidv4 } from 'uuid';
+import { CheckEmailDto } from './dtos/checkEmail.dto';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +20,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly mailsService: MailsService,
   ) {}
+
   async getJWT(jwtDto: JwtDto) {
     const user = await this.validateUser(jwtDto);
     const accessToken = this.generateAccessToken(user); // AccessToken 생성
@@ -45,6 +52,16 @@ export class AuthService {
       user = await this.usersService.create(jwtDto);
     }
     return user;
+  }
+
+  async clearpw(dto: CheckEmailDto) {
+    const password = uuidv4().substring(0, 6);
+    await this.usersService.updatePW({ email: dto.email, password });
+    await this.mailsService.sendEmail({
+      email: dto.email,
+      code: password,
+      filename: 'pw',
+    });
   }
 
   async generateAccessToken(jwtDto: JwtDto) {

@@ -33,7 +33,19 @@ export class UsersService {
       username,
     });
   }
-
+  async updatePW({ email, password }) {
+    const saltOrRounds = 10;
+    password = await bcrypt.hash(password, saltOrRounds);
+    const user = await this.findUserByEmailWithToken({ email });
+    if (!user) {
+      throw new NotFoundException('유저를 찾을 수 없습니다.');
+    }
+    console.log(user);
+    return await this.usersRepository.save({
+      ...user,
+      password,
+    });
+  }
   async toggleVerfied({ email }) {
     const user = await this.findUserByEmailWithToken({ email });
     if (!user) {

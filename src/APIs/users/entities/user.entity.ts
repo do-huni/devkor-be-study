@@ -1,4 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class User {
@@ -14,9 +20,15 @@ export class User {
   @Column()
   password: string;
 
-  @Column()
+  @Column({ default: false })
   isVerified: boolean;
 
   @Column({ default: null })
   current_refresh_token: string;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @DeleteDateColumn()
+  deleted_at: Date;
 }
