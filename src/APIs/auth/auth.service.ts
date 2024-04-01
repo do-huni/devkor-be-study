@@ -1,9 +1,16 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { JwtDto } from './dtos/jwt.dto';
+import { MailsService } from '../mails/mails.service';
+import { v4 as uuidv4 } from 'uuid';
+import { CheckEmailDto } from './dtos/checkEmail.dto';
 
 @Injectable()
 export class AuthService {
@@ -11,13 +18,29 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly mailsService: MailsService,
   ) {}
+
   async getJWT(jwtDto: JwtDto) {
     const user = await this.validateUser(jwtDto);
     const accessToken = this.generateAccessToken(user); // AccessToken 생성
     console.log(accessToken);
     const refreshToken = await this.generateRefreshToken(user); // refreshToken 생성
     return { accessToken, refreshToken };
+  }
+
+  async validateEmail({ email }) {
+    const code = await this.mailsService.saveCode({ email });
+    await this.mailsService.sendEmail({
+      email,
+      code,
+      filename: 'email',
+    });
+  }
+
+  async checkEmail({ email, code }) {
+    await this.mailsService.checkCode({ email, code });
+    await this.usersService.toggleVerfied({ email });
   }
 
   async validateUser(jwtDto: JwtDto) {
@@ -31,7 +54,19 @@ export class AuthService {
     return user;
   }
 
-  generateAccessToken(jwtDto: JwtDto) {
+  async clearpw(dto: CheckEmailDto) {
+    const password = uuidv4().substring(0, 6);
+    await this.usersService.updatePW({ email: dto.email, password });
+    await this.mailsService.sendEmail({
+      email: dto.email,
+      code: password,
+      filename: 'pw',
+    });
+  }
+
+  async generateAccessToken(jwtDto: JwtDto) {
+    await this.usersService.checkVerified({ email: jwtDto.email });
+
     const payload = { email: jwtDto.email };
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
@@ -40,6 +75,8 @@ export class AuthService {
   }
 
   async generateRefreshToken(jwtDto: JwtDto) {
+    await this.usersService.checkVerified({ email: jwtDto.email });
+
     const payload = { email: jwtDto.email };
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),

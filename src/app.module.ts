@@ -5,12 +5,14 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './APIs/auth/auth.module';
 import { UsersModule } from './APIs/users/users.module';
+import { MailsModule } from './APIs/mails/mails.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    MailsModule,
     AuthModule,
     UsersModule,
     TypeOrmModule.forRoot({
