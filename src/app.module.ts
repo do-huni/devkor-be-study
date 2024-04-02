@@ -7,6 +7,7 @@ import { AuthModule } from './APIs/auth/auth.module';
 import { UsersModule } from './APIs/users/users.module';
 import { MailsModule } from './APIs/mails/mails.module';
 import { BoardsModule } from './APIs/boards/boards.module';
+import { FavorsModule } from './APIs/\bfavors/favors.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { BoardsModule } from './APIs/boards/boards.module';
       isGlobal: true,
     }),
     MailsModule,
+    FavorsModule,
     BoardsModule,
     AuthModule,
     UsersModule,

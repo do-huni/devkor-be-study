@@ -9,21 +9,21 @@ import { Board } from 'src/APIs/boards/entities/board.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
 
 @Entity('like')
-export class Like {
+export class Favor {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onUpdate: 'CASCADE', onDelete: 'CASCADE' })
   user: User;
 
-  @RelationId((like: Like) => like.user)
+  @RelationId((like: Favor) => like.user)
   @Column()
   userId: string;
 
-  @ManyToOne(() => Board)
+  @ManyToOne(() => Board, { onUpdate: 'CASCADE', onDelete: 'CASCADE' })
   board: Board;
 
-  @RelationId((like: Like) => like.board)
+  @RelationId((like: Favor) => like.board)
   @Column()
   boardId: number;
 }

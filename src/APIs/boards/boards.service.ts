@@ -49,4 +49,13 @@ export class BoardsService {
       boardsAndCounts[0],
     );
   }
+
+  async fetchBoard({ id }) {
+    return await this.boardsRepository
+      .createQueryBuilder('b')
+      .innerJoin('b.user', 'user')
+      .addSelect(['user.email', 'user.username'])
+      .where('b.id = :id', { id })
+      .getOne();
+  }
 }

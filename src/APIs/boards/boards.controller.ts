@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Query,
   Req,
@@ -31,5 +32,10 @@ export class BoardsController {
   @Get()
   async fetchBoards(@Query() page: FetchPostsDto) {
     return await this.boardsService.fetchBoards(page);
+  }
+
+  @Get(':id')
+  async fetchBoard(@Param('id') id: number) {
+    return await this.boardsService.fetchBoard({ id });
   }
 }
