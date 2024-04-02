@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Board } from './entities/board.entity';
 import { Repository } from 'typeorm';
@@ -6,6 +6,7 @@ import { CreateBoardsDto } from './dtos/create-boards.dto';
 import { UsersService } from '../users/users.service';
 import { FetchPostsDto } from './dtos/fetch-posts.dto';
 import { Page } from 'src/utils/page/page';
+import { CommentsService } from '../comments/comments.service';
 
 @Injectable()
 export class BoardsService {
@@ -13,6 +14,7 @@ export class BoardsService {
     @InjectRepository(Board)
     private readonly boardsRepository: Repository<Board>,
     private readonly usersService: UsersService,
+    private readonly commentsService: CommentsService,
   ) {}
   async create(createBoardDto: CreateBoardsDto) {
     const userId = await this.usersService.getIdFromEmail({
@@ -49,13 +51,22 @@ export class BoardsService {
       boardsAndCounts[0],
     );
   }
-
+  async validCheck({ id }) {
+    const board = await this.boardsRepository.findOne({ where: { id } });
+    if (!board) {
+      throw new NotFoundException('게시글을 찾을 수 없습니다.');
+    }
+  }
   async fetchBoard({ id }) {
-    return await this.boardsRepository
+    await this.validCheck({ id });
+    await this.boardsRepository.update(id, { viewCount: () => 'viewCount+1' });
+    const comments = await this.commentsService.fetchComments({ boardId: id });
+    const board = await this.boardsRepository
       .createQueryBuilder('b')
       .innerJoin('b.user', 'user')
       .addSelect(['user.email', 'user.username'])
       .where('b.id = :id', { id })
       .getOne();
+    return { comments, board };
   }
 }

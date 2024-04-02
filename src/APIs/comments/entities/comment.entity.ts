@@ -40,12 +40,12 @@ export class Comment {
   @DeleteDateColumn()
   deleted_at: Date;
 
-  @ManyToOne(() => Comment, (comment) => comment.children)
+  @ManyToOne(() => Comment, (comment) => comment.children, { nullable: true })
   @JoinColumn({ name: 'parentId' })
   parent: Comment;
 
   @RelationId((comment: Comment) => comment.parent)
-  @Column()
+  @Column({ nullable: true })
   parentId: number;
 
   @OneToMany(() => Comment, (comment) => comment.parent)

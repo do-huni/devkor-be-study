@@ -36,6 +36,6 @@ export class BoardsController {
 
   @Get(':id')
   async fetchBoard(@Param('id') id: number) {
-    return await this.boardsService.fetchBoard({ id });
+    return this.boardsService.fetchBoard({ id });
   }
 }
