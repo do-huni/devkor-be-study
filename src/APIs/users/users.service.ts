@@ -23,6 +23,13 @@ export class UsersService {
   async findUserByEmailWithToken({ email }) {
     return await this.usersRepository.findOne({ where: { email } });
   }
+  async getIdFromEmail({ email }) {
+    return await this.usersRepository
+      .createQueryBuilder('user')
+      .select('user.id')
+      .where('user.email = :email', { email })
+      .getOne();
+  }
 
   async create({ email, password, username }: JwtDto) {
     const saltOrRounds = 10;

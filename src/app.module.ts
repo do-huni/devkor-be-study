@@ -6,6 +6,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './APIs/auth/auth.module';
 import { UsersModule } from './APIs/users/users.module';
 import { MailsModule } from './APIs/mails/mails.module';
+import { BoardsModule } from './APIs/boards/boards.module';
+import { FavorsModule } from './APIs/\bfavors/favors.module';
+import { CommentsModule } from './APIs/comments/comments.module';
 
 @Module({
   imports: [
@@ -13,6 +16,9 @@ import { MailsModule } from './APIs/mails/mails.module';
       isGlobal: true,
     }),
     MailsModule,
+    FavorsModule,
+    BoardsModule,
+    CommentsModule,
     AuthModule,
     UsersModule,
     TypeOrmModule.forRoot({

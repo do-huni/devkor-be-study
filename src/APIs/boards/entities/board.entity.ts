@@ -1,50 +1,33 @@
-// import {
-//   Column,
-//   Entity,
-//   ManyToOne,
-//   OneToMany,
-//   PrimaryGeneratedColumn,
-//   RelationId,
-// } from 'typeorm';
-// import { User } from './user.entity';
-// import { Comment } from './comment.entity';
-// import { Reply } from './reply.entity';
-// import { Like } from './like.entity';
-// import { View } from './view.entity';
+import { User } from 'src/APIs/users/entities/user.entity';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  RelationId,
+} from 'typeorm';
 
-// @Entity()
-// export class Post extends BasicDate {
-//   @PrimaryGeneratedColumn()
-//   id: number;
+@Entity()
+export class Board {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-//   @Column()
-//   title: string;
+  @Column()
+  title: string;
 
-//   @Column()
-//   content: string;
+  @Column()
+  content: string;
 
-//   @ManyToOne((type) => User, (user) => user.posts)
-//   user: User;
+  @ManyToOne(() => User)
+  user: User;
 
-//   @RelationId((post: Post) => post.user)
-//   @Column() //fk
-//   userUuid: string;
+  @RelationId((board: Board) => board.user)
+  @Column()
+  userId: string;
 
-//   @OneToMany((type) => Comment, (comment) => comment.post)
-//   comments: Comment[];
+  @Column({ default: 0 })
+  viewCount: number;
 
-//   @OneToMany((type) => Reply, (reply) => reply.post)
-//   replies: Reply[];
-
-//   @OneToMany((type) => Like, (like) => like.post)
-//   likes: Like[];
-
-//   @OneToMany((type) => View, (view) => view.post)
-//   views: View[];
-
-//   // @Column({ default: 0 }) //필요한가?
-//   // likeCount: number;
-
-//   // @Column({ default: 0 }) //필요한가? 2 일단 유지
-//   // viewCount: number;
-// }
+  @Column({ default: 0 })
+  likeCount: number;
+}

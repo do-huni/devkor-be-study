@@ -43,6 +43,7 @@ export class AuthController {
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken');
     res.clearCookie('isLoggedIn');
+    return { message: 'completed' };
   }
 
   @Post('signin')
@@ -55,6 +56,7 @@ export class AuthController {
     res.cookie('accessToken', accessToken, { httpOnly: true });
     res.cookie('refreshToken', refreshToken, { httpOnly: true });
     res.cookie('isLoggedIn', true, { httpOnly: false });
+    return res.send();
   }
 
   @Get('signup/email')
@@ -65,6 +67,7 @@ export class AuthController {
   async verifyEmail(@Body() body: CheckCodeDto) {
     console.log(body);
     await this.authService.checkEmail(body);
+    return { message: 'completed ' };
   }
 
   @Get('refresh')

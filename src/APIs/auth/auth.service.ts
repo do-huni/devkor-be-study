@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -23,8 +19,7 @@ export class AuthService {
 
   async getJWT(jwtDto: JwtDto) {
     const user = await this.validateUser(jwtDto);
-    const accessToken = this.generateAccessToken(user); // AccessToken 생성
-    console.log(accessToken);
+    const accessToken = await this.generateAccessToken(user); // AccessToken 생성
     const refreshToken = await this.generateRefreshToken(user); // refreshToken 생성
     return { accessToken, refreshToken };
   }
@@ -68,20 +63,14 @@ export class AuthService {
     await this.usersService.checkVerified({ email: jwtDto.email });
 
     const payload = { email: jwtDto.email };
-    return this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-      expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRES_IN'),
-    });
+    return this.jwtService.sign(payload);
   }
 
   async generateRefreshToken(jwtDto: JwtDto) {
     await this.usersService.checkVerified({ email: jwtDto.email });
 
     const payload = { email: jwtDto.email };
-    const refreshToken = this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-      expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN'),
-    });
+    const refreshToken = this.jwtService.sign(payload);
     const saltOrRounds = 10;
     const current_refresh_token = await bcrypt.hash(refreshToken, saltOrRounds);
 
