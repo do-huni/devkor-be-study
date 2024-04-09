@@ -20,6 +20,6 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'public')); // 정적파일제공
   app.setBaseViewsDir(join(__dirname, '..', 'views')); // dir
   app.setViewEngine('ejs'); // 템플릿 엔진설정
-  await app.listen(3000);
+  await app.listen(process.env.PROT);
 }
 bootstrap();
